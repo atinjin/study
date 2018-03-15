@@ -1,2 +1,0 @@
-# study-reactjs
-study reactjs
