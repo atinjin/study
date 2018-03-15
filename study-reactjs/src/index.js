@@ -1,11 +1,11 @@
 import React from 'react'
 import { render } from 'react-dom'
 import Menu from './components/Menu'
-import data from './data/data'
+import data from './data/recipes'
 
-windows.React = React
+window.React = React
 
 render (
     <Menu recipes={data}/>,
-    document.getElementById("react-countainer")
+    document.getElementById("react-container")
 )
