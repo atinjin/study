@@ -23,6 +23,9 @@ module.exports = {
     devServer: {
         inline: true,
         hot: true,
-        contentBase: __dirname + '/public/'
+        contentBase: __dirname + '/public/',
+        proxy: {
+            "/app" : "http://localhost:8080"
+        }
     }
 }
