@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 public class HashMapTTL<K, V> implements Map<K, V> {
 
 	private final HashMap<K, V> hashMap = new HashMap<>();
-	private final HashMap<K, Long> ttlNanoSecondMap = new HashMap<>();
+	private final HashMap<K, Long> timestampMap = new HashMap<>();
 	private final long ttl;
 
 	public HashMapTTL(TimeUnit ttlUnit, long ttlValue) {
@@ -23,24 +23,21 @@ public class HashMapTTL<K, V> implements Map<K, V> {
 		V value = this.hashMap.get(key);
 		if (Objects.nonNull(value) && expired(key, value)) {
 			hashMap.remove(key);
-			ttlNanoSecondMap.remove(key);
+			timestampMap.remove(key);
 			return null;
 		}
 
 		return value;
 	}
 
-	private boolean expired(Object key, V value) {
-		Long nanoSecond = ttlNanoSecondMap.get(key);
-		if(Objects.nonNull(nanoSecond) && (System.nanoTime() - ttlNanoSecondMap.get(key)) < this.ttl ) {
-			return false;
-		}
-		return true;
+	private boolean expired(Object key) {
+		Long nanoSecond = timestampMap.get(key);
+		return Objects.isNull(nanoSecond) || (System.nanoTime() - timestampMap.get(key)) > this.ttl;
 	}
 
 	@Override
 	public V put(K key, V value) {
-		ttlNanoSecondMap.put(key, System.nanoTime());
+		timestampMap.put(key, System.nanoTime());
 		return hashMap.put(key, value);
 	}
 
@@ -70,7 +67,7 @@ public class HashMapTTL<K, V> implements Map<K, V> {
 
 	@Override
 	public V remove(Object key) {
-		ttlNanoSecondMap.remove(key);
+		timestampMap.remove(key);
 		return hashMap.remove(key);
 	}
 
@@ -83,7 +80,7 @@ public class HashMapTTL<K, V> implements Map<K, V> {
 
 	@Override
 	public void clear() {
-		ttlNanoSecondMap.clear();
+		timestampMap.clear();
 		hashMap.clear();
 	}
 
@@ -106,8 +103,11 @@ public class HashMapTTL<K, V> implements Map<K, V> {
 	}
 
 	private void clearExpired() {
-		for (K k : hashMap.keySet()) {
-			this.get(k);
+		for (K key : hashMap.keySet()) {
+			if (expired(key)) {
+				hashMap.remove(key);
+				timestampMap.remove(key);
+			}
 		}
 	}
 

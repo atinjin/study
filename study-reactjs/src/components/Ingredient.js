@@ -15,7 +15,7 @@ class Ingredient extends React.Component {
         this.setState({loading: true})
         fetch('/app/jobs')
             .then(response => response.json())
-            .then(d => this.setState({data: d.id}))
+            .then(d => this.setState({data: response}))
         this.setState({loading: false})
     }
 
