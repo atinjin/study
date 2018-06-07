@@ -21,7 +21,7 @@ public class HashMapTTL<K, V> implements Map<K, V> {
 	@Override
 	public V get(Object key) {
 		V value = this.hashMap.get(key);
-		if (Objects.nonNull(value) && expired(key, value)) {
+		if (Objects.nonNull(value) && isExpired(key, value)) {
 			hashMap.remove(key);
 			timestampMap.remove(key);
 			return null;
@@ -30,7 +30,7 @@ public class HashMapTTL<K, V> implements Map<K, V> {
 		return value;
 	}
 
-	private boolean expired(Object key) {
+	private boolean isExpired(Object key) {
 		Long nanoSecond = timestampMap.get(key);
 		return Objects.isNull(nanoSecond) || (System.nanoTime() - timestampMap.get(key)) > this.ttl;
 	}
@@ -55,7 +55,7 @@ public class HashMapTTL<K, V> implements Map<K, V> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		clearExpired();
+		expire(key);
 		return hashMap.containsKey(key);
 	}
 
@@ -102,9 +102,16 @@ public class HashMapTTL<K, V> implements Map<K, V> {
 		return unmodifiableSet(hashMap.entrySet());
 	}
 
+	private void expire(K key) {
+		if (isExpired(key)) {
+			hashMap.remove(key);
+			timestampMap.remove(key);
+		}
+	}
+
 	private void clearExpired() {
 		for (K key : hashMap.keySet()) {
-			if (expired(key)) {
+			if (isExpired(key)) {
 				hashMap.remove(key);
 				timestampMap.remove(key);
 			}
