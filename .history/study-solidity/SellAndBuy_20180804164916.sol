@@ -1,0 +1,90 @@
+pragma solidity ^0.4.21;
+
+contract SellAndBuy {
+    uint public value;      //상품의 가격
+    address public seller;  //판매자
+    address public buyer;   //구매자
+    enum State { Created, Locked, Inactive }    //계약의 상태 종류
+    State public state;     //계약 상태
+
+    // `msg.value`는 짝수여야 한다.
+    // 솔리디티에서는 정수형을 나눌 경우 소수점을 버리기 때문이다.
+    // 짝수였는지 확인하는 코드를 넣는다.
+    function Purchase() public payable {
+        seller = msg.sender;    //계약을 만드는 사람이 판매자이다.
+        value = msg.value / 2;  //판매자는 상품 가격의 2배되는 이더를 deposit으로 내놓는다.
+        require((2 * value) == msg.value);
+    }
+
+    modifier condition(bool _condition) {
+        require(_condition);
+        _;
+    }
+
+    modifier onlyBuyer() {
+        require(msg.sender == buyer);
+        _;
+    }
+
+    modifier onlySeller() {
+        require(msg.sender == seller);
+        _;
+    }
+
+    modifier inState(State _state) {
+        require(state == _state);
+        _;
+    }
+
+    event Aborted();
+    event PurchaseConfirmed();
+    event ItemReceived();
+
+    /// 계약 취소
+    /// Can only be called by the seller before
+    /// the contract is locked.
+    function abort()
+        public
+        onlySeller
+        inState(State.Created)
+    {
+        emit Aborted();
+        state = State.Inactive;
+        seller.transfer(this.balance);
+    }
+
+    /// Confirm the purchase as buyer.
+    /// Transaction has to include `2 * value` ether.
+    /// The ether will be locked until confirmReceived
+    /// is called.
+    function confirmPurchase()
+        public
+        inState(State.Created)
+        condition(msg.value == (2 * value))
+        payable
+    {
+        emit PurchaseConfirmed();
+        buyer = msg.sender;
+        state = State.Locked;
+    }
+
+    /// Confirm that you (the buyer) received the item.
+    /// This will release the locked ether.
+    function confirmReceived()
+        public
+        onlyBuyer
+        inState(State.Locked)
+    {
+        emit ItemReceived();
+        // It is important to change the state first because
+        // otherwise, the contracts called using `send` below
+        // can call in again here.
+        state = State.Inactive;
+
+        // NOTE: This actually allows both the buyer and the seller to
+        // block the refund - the withdraw pattern should be used.
+
+        buyer.transfer(value);
+        seller.transfer(this.balance);
+    }
+}
