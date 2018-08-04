@@ -13,26 +13,26 @@ contract SellAndBuy {
     function Purchase() public payable {
         seller = msg.sender;    //계약을 만드는 사람이 판매자이다.
         value = msg.value / 2;  //판매자는 상품 가격의 2배되는 이더를 deposit으로 내놓는다.
-        require((2 * value) == msg.value, "Deposit 조건에 맞지 않습니다.");
+        require((2 * value) == msg.value);
     }
 
     modifier condition(bool _condition) {
-        require(_condition, "조건에 맞지 않습니다.");
+        require(_condition);
         _;
     }
 
     modifier onlyBuyer() {
-        require(msg.sender == buyer, "구매자가 아닙니다.");
+        require(msg.sender == buyer);
         _;
     }
 
     modifier onlySeller() {
-        require(msg.sender == seller, "판매자가 아닙니다.");
+        require(msg.sender == seller);
         _;
     }
 
     modifier inState(State _state) {
-        require(state == _state, "계약 상태가 맞지 않습니다.");
+        require(state == _state);
         _;
     }
 

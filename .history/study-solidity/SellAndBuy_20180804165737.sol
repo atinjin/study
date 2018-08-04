@@ -13,26 +13,26 @@ contract SellAndBuy {
     function Purchase() public payable {
         seller = msg.sender;    //계약을 만드는 사람이 판매자이다.
         value = msg.value / 2;  //판매자는 상품 가격의 2배되는 이더를 deposit으로 내놓는다.
-        require((2 * value) == msg.value, "Deposit 조건에 맞지 않습니다.");
+        require((2 * value) == msg.value);
     }
 
     modifier condition(bool _condition) {
-        require(_condition, "조건에 맞지 않습니다.");
+        require(_condition);
         _;
     }
 
     modifier onlyBuyer() {
-        require(msg.sender == buyer, "구매자가 아닙니다.");
+        require(msg.sender == buyer);
         _;
     }
 
     modifier onlySeller() {
-        require(msg.sender == seller, "판매자가 아닙니다.");
+        require(msg.sender == seller);
         _;
     }
 
     modifier inState(State _state) {
-        require(state == _state, "계약 상태가 맞지 않습니다.");
+        require(state == _state);
         _;
     }
 
@@ -50,7 +50,7 @@ contract SellAndBuy {
     {
         emit Aborted();
         state = State.Inactive;     // 계약 상태는 "파기" 상태로 돌려 계약을 못하게 한다.
-        seller.transfer(address(this).balance);  // 판매자에게 deposit을 되돌려 준다.
+        seller.transfer(this.balance);  // 판매자에게 deposit을 되돌려 준다.
     }
 
     /// 구매자는 구매 확인으로 계약을 시작한다.
@@ -79,6 +79,6 @@ contract SellAndBuy {
         // block the refund - the withdraw pattern should be used.
 
         buyer.transfer(value);  // 계약이 완료되었기 때문에 판매자는 deposit을 돌려받는다.
-        seller.transfer(address(this).balance);  // 판매자는 자신이 건 deposit을 포함한 판매자가 지불한 상품값까지 모두 받는다.
+        seller.transfer(address(contract).balanc);  // 판매자는 자신이 건 deposit을 포함한 판매자가 지불한 상품값까지 모두 받는다.
     }
 }
