@@ -2,7 +2,7 @@ import redis
 import pandas as pd
 
 r = redis.Redis(
-    host='travel-catalog-cache.nquffl.clustercfg.apn2.cache.amazonaws.com',
+    host='localhost',
     port=6379)
 
 r.set('test-key', 'test-value')
