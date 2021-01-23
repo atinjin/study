@@ -19,6 +19,20 @@ def merge(intervals_a, intervals_b):
 
 
 def merge_better(intervals_a, intervals_b):
+    """
+    There are five overlapping possibilities between two intervals ‘a’ and ‘b’.
+    A close observation will tell us that whenever the two intervals overlap,
+    one of the interval’s start time lies within the other interval.
+    This rule can help us identify if any two intervals overlap or not.
+    Now, if we have found that the two intervals overlap, how can we find the overlapped part?
+    Again from the above diagram, the overlapping interval will be equal to:
+      start = max(a.start, b.start)
+      end = min(a.end, b.end)
+    That is, the highest start time and the lowest end time will be the overlapping interval.
+    So our algorithm will be to iterate through both the lists together to see if any two intervals overlap.
+    If two intervals overlap, we will insert the overlapped part into a result list
+    and move on to the next interval which is finishing early.
+    """
     idx_a, idx_b = 0, 0
     start, end = 0, 1
     result = []
